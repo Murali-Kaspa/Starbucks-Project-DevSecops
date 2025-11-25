@@ -38,6 +38,7 @@ if [[ "$userinput" == "yes" ]]; then
     sleep 5
     sudo usermod -aG docker jenkins
     sudo docker --version
+    #Always restart the server to get the full permissions of docker.
 
     echo "---------------------------------------------"
     echo "🎉 Installing SonarQube!"
