@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: starbucks-container
-        image: muralikaspa1998/starbucks:
+        image: muralikaspa1998/starbucks:6
         ports:
         - containerPort: 3000
 ---
