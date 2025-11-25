@@ -12,6 +12,7 @@ pipeline {
     }
 
     stages {
+
         stage('clean workspace') {
             steps {
                 cleanWs()
@@ -46,31 +47,25 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
 
         stage('TRIVY FS SCAN') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh 'trivy fs . > trivyfs.txt'
-                }
+                sh 'trivy fs . > trivyfs.txt'
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        withDockerRegistry([credentialsId: 'Docker-Creds', toolName: 'docker']) {
-                            sh '''
-                                docker build -t starbucks .
-                                docker tag starbucks muralikaspa1998/starbucks:${Version}
-                                docker push muralikaspa1998/starbucks:${Version}
-                            '''
-                        }
+                script {
+                    withDockerRegistry([credentialsId: 'Docker-Creds', toolName: 'docker']) {
+                        sh '''
+                            docker build -t starbucks .
+                            docker tag starbucks muralikaspa1998/starbucks:${Version}
+                            docker push muralikaspa1998/starbucks:${Version}
+                        '''
                     }
                 }
             }
@@ -78,19 +73,15 @@ pipeline {
 
         stage('TRIVY IMAGE SCAN') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh "trivy image muralikaspa1998/starbucks:${Version} > trivyimage.txt"
-                }
+                sh "trivy image muralikaspa1998/starbucks:${Version} > trivyimage.txt"
             }
         }
 
         stage('App Deploy to Docker container') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh """
-                        docker run -d --name starbucks-${BUILD_NUMBER} -p 3000:3000 muralikaspa1998/starbucks:${Version}
-                    """
-                }
+                sh """
+                    docker run -d --name starbucks-${BUILD_NUMBER} -p 3000:3000 muralikaspa1998/starbucks:${Version}
+                """
             }
         }
 
@@ -100,19 +91,17 @@ pipeline {
                 GIT_USER_NAME = "Murali-Kaspa"
             }
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withCredentials([gitUsernamePassword(credentialsId: 'Git-Creds', gitToolName: 'Default')]) {
-                        echo 'Update Deployment File'
-                        sh '''
-                            git config user.email "murali.kaspa26@gmail.com"
-                            git config user.name "Murali-Kaspa"
-                            rm -rf *.rpm.*
-                            sed -i "s#muralikaspa1998/starbucks:.*#muralikaspa1998/starbucks:${BUILD_NUMBER}#g" Kubernetes/deployment.yaml
-                            git add .
-                            git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                            git push -u origin main
-                        '''
-                    }
+                withCredentials([gitUsernamePassword(credentialsId: 'Git-Creds', gitToolName: 'Default')]) {
+                    echo 'Update Deployment File'
+                    sh '''
+                        git config user.email "murali.kaspa26@gmail.com"
+                        git config user.name "Murali-Kaspa"
+                        rm -rf *.rpm.*
+                        sed -i "s#muralikaspa1998/starbucks:.*#muralikaspa1998/starbucks:${BUILD_NUMBER}#g" kubernetes/manifest.yml
+                        git add .
+                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git push -u origin main
+                    '''
                 }
             }
         }
