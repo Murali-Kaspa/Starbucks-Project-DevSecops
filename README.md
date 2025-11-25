@@ -4,4 +4,4 @@ In this project i am creating a end to end Starbucks project by using DevSecops 
 
 Tools: Docker, Kubernetes, Jenkins, GitHub, SonarQube, Trivy, HashiCorp Vault, ArgoCd, Gmail
 
-Jenkins Plugins: Pipeline Stage View, Docker, Docker Pipeline, Email Extended Plugin, Kubernetes, SonarQube
+Jenkins Plugins: NodeJs, Pipeline Stage View, Docker, Docker-Pipeline, Email Extended Plugin, Kubernetes, SonarQube, HashiCorp Vault, HashiCorp Vault Pipeline
